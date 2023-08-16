@@ -5,6 +5,7 @@
   "main": "index.ts",
   "dependencies": {
     "playwright": "^1.37.0",
+    "request": "^2.88.2",
     "util": "^0.12.4"
   },
   "devDependencies": {
@@ -13,17 +14,18 @@
     "ts-loader": "^9.4.2"
   },
   "scripts": {
-    "onPrem-endToEnd": "npx playwright test login.spec.ts --headed --config=resources/conf/playwright.config.ts --project firefox",
-    "onPrem-parallel": "npx playwright test --headed --config=resources/conf/playwright.config.ts --workers 2"
+    "onPrem-endToEnd": "PLAYWRIGHT_JUNIT_OUTPUT_NAME=results.xml npx playwright test login.spec.ts --headed --config=resources/conf/playwright.config.ts --project firefox --reporter=junit",
+    "onPrem-parallel": "PLAYWRIGHT_JUNIT_OUTPUT_NAME=results.xml npx playwright test --headed --config=resources/conf/playwright.config.ts --workers 2 --reporter=junit",
+    "upload-to-test-manangement": "node src/test/upload-to-TM.spec.ts"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/princebaretto99/browserstack-examples-playwright.git"
+    "url": "git+https://github.com/garyb-bs/playwright-test-management-example/issues.git"
   },
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/princebaretto99/browserstack-examples-playwright/issues"
+    "url": "https://github.com/garyb-bs/playwright-test-management-example/issues"
   },
-  "homepage": "https://github.com/princebaretto99/browserstack-examples-playwright#readme"
+  "homepage": "https://github.com/garyb-bs/playwright-test-management-example#readme"
 }

@@ -1,14 +1,16 @@
-![Logo](https://www.browserstack.com/images/static/header-logo.jpg)
+<p float="center">
+  <img src="https://www.browserstack.com/blog/content/images/2023/06/Screenshot-2023-06-20-at-12.53.41-PM.png" width="500" height="200" title="Percy.IO2">
+</p>
+<p float="left">
+  <img src="https://pbs.twimg.com/profile_images/1318604600677527552/stk8sqYZ_400x400.png" width="100" height="100" title="Percy.IO">
+  <img src="https://cdn.freebiesupply.com/logos/large/2x/browserstack-logo-png-transparent.png" width="100" height="100" title="Percy.IO2">
+</p>
 
-# BrowserStack Examples Playwright Framework <a href="https://playwright.dev/"><img src="https://playwright.dev/img/playwright-logo.svg" alt="Playwright" height="30" /></a>
+# Playwright + BrowserStack Test Management Example <a href="https://playwright.dev/"><img src="https://playwright.dev/img/playwright-logo.svg" alt="Playwright" height="30" /></a>
 
 ## Introduction
 
-Playwright is a framework for Web Testing and Automation. It allows testing Chromium, Firefox and WebKit with a single API. Playwright is built to enable cross-browser web automation that is ever-green, capable, reliable and fast.
-
-This BrowserStack Example repository demonstrates a test framework written in Playwright Framework with parallel testing capabilities. The Playwright test scripts are written for the open source [BrowserStack Demo web application](https://bstackdemo.com) ([Github](https://github.com/browserstack/browserstack-demo-app)). This BrowserStack Demo App is an e-commerce web application which showcases multiple real-world user scenarios. The app is bundled with offers data, orders data and products data that contains everything you need to start using the app and run tests out-of-the-box.
-
-The Playwright tests are run on different platforms like on-prem and BrowserStack using various run configurations and test capabilities.
+This example is to demonstrate the use of BrowserStack Test Management to automatically generate test cases from a JUNit report of your automation tests.
 
 ---
 
@@ -24,262 +26,40 @@ The Playwright tests are run on different platforms like on-prem and BrowserStac
     npm install
     ```
 
+## Running Tests
 
-## About the tests in this repository
+If you look at the package.json file, in teh scripts section you will see that there is an environment variable being defined ahead of the test execution:
 
-  This repository contains the following Selenium tests:
+```sh
+PLAYWRIGHT_JUNIT_OUTPUT_NAME=results.xml
+```
 
-  | Module   | Test name                          | Description |
-  | ---   | ---                                   | --- |
-  | e2e      | E2E Test                | This test scenario verifies successful product purchase lifecycle end-to-end. |
-  | login    | Check if Signin opens on clicking on favourites nav item          | This test verifies the login workflow with different types of valid login users. |
-  | login    | Check Login with locked_user               | This test verifies the login workflow error for a locked user. |
-  | offers   | Set GPS location to Mumbai and check offers     | This test mocks the GPS location for Mumbai and verifies that the product offers applicable for the Mumbai location are shown.   |
-  | product  | Apply Apple And Samsung Filter          | This test verifies that the Apple products are only shown if the Apple vendor filter option is applied. |
-  | product  | Apply 'Lowest to Highest' Order By Filter   | This test verifies that the product prices are in ascending order when the product sort "Lowest to Highest" is applied. |
-  | user     | Check Login with image_not_loading_user | This test verifies that the product images load for user: "image_not_loading_user" on the e-commerce application. Since the images do not load, the test case assertion fails.|
-  | user     | Check Order in existing_orders_user |  This test verifies that existing orders are shown for user: "existing_orders_user"  |
-  
-  ---
+And also a new property appended to the end:
 
+```sh
+--reporter=junit
+```
 
-## Test infrastructure environments 
+So the complete command looks like this:
 
-- [On-premise/self-hosted](#on-premise-self-hosted)
-- [BrowserStack](#browserstack)
+```sh
+PLAYWRIGHT_JUNIT_OUTPUT_NAME=results.xml npx playwright test login.spec.ts --headed --config=resources/conf/playwright.config.ts --project firefox --reporter=junit
+```
 
+This will create a JUnit report with the name specified. This is what we will use to upload to Test Management.
 
-# On Premise / Self Hosted
+## Uploading Tests to Test Management
 
-## Running Your Tests
+Once the tests are completed, you can then upload the results to Test Management. To do this, run the script "upload-to-test-manangement" to perform a POST request that will upload the results.
 
-### Run a specific test on your own machine
+```sh
+npm run upload-to-test-management
+```
 
-- How to run the test?
+In order for this to work, you will need to update the API-TOKEN to your token and you can also change the names for the projects and test runs should you need to
 
-  To run a specific test scenario, use the following command with the additional 'test-name' argument:
-  
-  ```sh
-  npx playwright test <spec-file> --headed --config=resources/conf/playwright.config.ts --project <project-name>
-  ```
-
-  where,  the argument `<spec-file>` can be any spec files from the repository.
-  
-  E.g. "e2e.spec.ts", "login.spec.ts", "product.spec.ts" or any of the other tests, as outlined in [About the tests in this repository](#About-the-tests-in-this-repository) section.
-
-  Also, the argument `<project-name>` can be any of the project names from the `playwright.conf.ts` file.
-
-  Or, you can directly run the pre-confifured setup by running the below command:
-  ```sh
-  npm run onPrem-endToEnd
-  ```
-
-- Output
-
-  This run profile executes a specific test scenario on a single browser instance on your own machine.
-
-
-### Run the entire test suite in parallel on your own machine
-
-  To run the entire test suite on your own machine, use the following command:
-  
-  ```sh
-  npx playwright test --headed --config=resources/conf/playwright.config.ts --workers 2
-  ```
-
-  Or, you can directly run the pre-confifured setup by running the below command:
-
-  ```sh
-  npm run onPrem-parallel
-  ```
-
-
-- Output
-
-  This run profile executes the entire test collection in parallel on single/multiple browsers based on the configuration file, on your own machine.
-
-  
----
-
-
-# BrowserStack
-
-[BrowserStack](https://browserstack.com) provides instant access to 2,000+ real mobile devices and browsers on a highly reliable cloud infrastructure that effortlessly scales as testing needs grow.
-
-## Prerequisites
-
-- Create a new [BrowserStack account](https://www.browserstack.com/users/sign_up) or use an existing one.
-- Identify your BrowserStack username and access key from the [BrowserStack Automate Dashboard](https://automate.browserstack.com/) and export them as environment variables using the below commands.
-
-    - For \*nix based and Mac machines:
-
-  ```sh
-  export BROWSERSTACK_USERNAME=<browserstack-username> &&
-  export BROWSERSTACK_ACCESS_KEY=<browserstack-access-key>
-  ```
-
-    - For Windows:
-
-  ```shell
-  set BROWSERSTACK_USERNAME=<browserstack-username>
-  set BROWSERSTACK_ACCESS_KEY=<browserstack-access-key>
-  ```
-  
-  Alternatively, you can also hardcode username and access_key objects in the [fixtures.ts](./fixtures.ts) file.
-
-Note:
-- We have configured a list of test capabilities in the [playwright-bstack.config.ts](resources/conf/playwright-bstack.config.ts) file. You can certainly update them based on your device / browser test requirements. 
-- The exact test capability values can be easily identified using the [Browserstack Capability Generator](https://browserstack.com/automate/capabilities) and the allowed Browsers and OS are mentioned [here](https://www.browserstack.com/docs/automate/playwright/browsers-and-os)
-
-
-## Running Your Tests
-
-### Run a specific test on BrowserStack
-
-In this section, we will run a single test on Chrome browser on Browserstack. To change test capabilities for this configuration, please refer to the `playwright-bstack.config.ts` file.
-
-- How to run the test?
-  
-
-  To run a specific test scenario, use the following command :
-  Note: You can change the test you want to run by replacing the respective spec file.
-
-  ```sh
-  npx playwright test <spec-file> --config=resources/conf/playwright-bstack.config.ts --project 'chrome@latest:Windows 10@browserstack'"
-
-  ```
-
-  where,  the argument `<spec-file>` can be any spec files from the repository.
-  
-  E.g. "e2e.spec.ts", "login.spec.ts", "product.spec.ts" or any of the other tests, as outlined in [About the tests in this repository](#About-the-tests-in-this-repository) section.
-
-  Also, the argument `<project-name>` can be any of the project names from the `playwright-bstack.conf.ts` file.
-
-  Or, you can directly run the pre-confifured setup by running the below command:
-
-  ```sh
-  npm run bstack-single
-  ```
-
-- Output
-
-  This run profile executes a single test on a single browser on BrowserStack. Please refer to your [BrowserStack dashboard](https://automate.browserstack.com/) for test results.
-
-
-### Run the entire test suite in parallel on BrowserStack browsers
-
-In this section, we will run the tests in parallel on a single browser on Browserstack. Refer to `playwright-bstack.conf.ts` file to change test capabilities for this configuration.
-
-- How to run the test?
-
-  To run the entire test suite in parallel on a single BrowserStack browser, use the following command:
-  
-  ```sh
-  npx playwright test --config=resources/conf/playwright-bstack.config.ts --project '<project-name>' --workers 5
-  ```
-
- Note: The `workers` argument mentions the number of tests you want to run in parallel at a time.
-
-- Output
-
-  This run profile executes the entire test suite in parallel on a single BrowserStack browser. Please refer to your [BrowserStack dashboard](https://automate.browserstack.com/) for test results.
-
-  Or, you can directly run the pre-confifured setup by running the below command:
-
-  ```sh
-  npm run bstack-parallel-tests
-  ```
-
-  <b>Note:</b> If you want to run tests on multiple browsers, you just need to remove the `project` argument from the command.
-
-  You can directly run the above scenario using the following command:
-
-  ```sh
-  npm run bstack-parallel-browsers
-  ```
-
-
-
-
-### Run a tests on BrowserStack which need Local Environment access
-
-## Prerequisites
-* Clone the BrowserStack demo application repository.
-    ```sh
-    git clone https://github.com/browserstack/browserstack-demo-app
-    ```
-* Please follow the README.md on the BrowserStack demo application repository to install and start the dev server on localhost.
-
-* In this section, we will run a single test case to test the BrowserStack Demo app hosted on your local machine i.e. localhost. Refer to the `playwright-bstack-local.conf.ts` file for configuration and setup and teardown processes.
-
-Note: You may need to provide additional BrowserStackLocal arguments to successfully connect your localhost environment with BrowserStack infrastructure. (e.g if you are behind firewalls, proxy or VPN).
-
-* Further details for successfully creating a BrowserStackLocal connection can be found here:
-
-    * [Local Testing with Automate](https://www.browserstack.com/local-testing/automate)
-  
-## [Web application hosted on internal environment] Run a specific test on BrowserStack using BrowserStackLocal
-
-In this section, we will run a single test on Chrome browser on Browserstack. To change test capabilities for this configuration, please refer to the `playwright-bstack-local.config.ts` file.
-  
-  To run a specific test scenario, use the following command :
-  Note: You can change the test you want to run by replacing the respective spec file.
-
-  ```sh
-  npx playwright test <spec-file> --config=resources/conf/playwright-bstack-local.config.ts --project 'chrome@latest:Windows 10@browserstack'"
-  ```
-
-  where,  the argument `<spec-file>` can be any spec files from the repository.
-  
-  E.g. "e2e.spec.ts", "login.spec.ts", "product.spec.ts" or any of the other tests, as outlined in [About the tests in this repository](#About-the-tests-in-this-repository) section.
-
-  Also, the argument `<project-name>` can be any of the project names from the `playwright-bstack.conf.ts` file.
-
-Or, you can directly run the pre-confifured setup by running the below command:
-
-  ```sh
-  npm run bstack-local
-  ```
-
-- Output
-
-  This run profile executes a single test on a single browser on BrowserStack. Please refer to your [BrowserStack dashboard](https://automate.browserstack.com/) for test results.
-
-
-### [Web application hosted on internal environment] Run a tests in parallel on BrowserStack using BrowserStackLocal
-
-Refer the below snippet, here we will run the tests in parallel on a single browser on Browserstack. Refer to `playwright-bstack-local.conf.ts` file to change test capabilities for this configuration.
-  
-  ```sh
-  npx playwright test --config=resources/conf/playwright-bstack-local.config.ts --project '<project-name>' --workers 5
-  ```
-
-Refer the below snippet, here we will run the tests in parallel on a multiple browser on Browserstack. Refer to `playwright-bstack-local.conf.ts` file to change test capabilities for this configuration.
-  
-  ```sh
-  npx playwright test --config=resources/conf/playwright-bstack-local.config.ts --workers 5
-  ```
-
- Note: The `workers` argument mentions the number of tests you want to run in parallel at a time.
-
-
-Or, you can directly run the pre-confifured setup by running the below command:
-
-  ```sh
-  npm run bstack-local-parallel
-  ```
-
-- Output
-
-  This run profile executes the entire test suite in parallel on a single BrowserStack browser. Please refer to your [BrowserStack dashboard](https://automate.browserstack.com/) for test results.
-
-
-## Additional Resources
-
-- View your test results on the [BrowserStack Automate dashboard](https://www.browserstack.com/automate)
-- Documentation for writing [Automate test scripts in Java](https://www.browserstack.com/automate/java)
-- Customizing your tests capabilities on BrowserStack using our [test capability generator](https://www.browserstack.com/automate/capabilities)
-- [Using Automate REST API](https://www.browserstack.com/automate/rest-api) to access information about your tests via the command-line interface
-- Understand how many parallel sessions you need by using our [Parallel Test Calculator](https://www.browserstack.com/automate/parallel-calculator?ref=github)
-- For testing public web applications behind IP restriction, [Inbound IP Whitelisting](https://www.browserstack.com/local-testing/inbound-ip-whitelisting) can be enabled with the [BrowserStack Enterprise](https://www.browserstack.com/enterprise) offering
-
+```js
+'headers': {
+    'API-TOKEN': '<insert token>'
+  },
+```
