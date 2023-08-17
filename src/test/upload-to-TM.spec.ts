@@ -1,5 +1,6 @@
 var request = require('request');
 var fs = require('fs');
+
 var options = {
   'method': 'POST',
   'url': 'https://test-management.browserstack.com/api/v1/import/results/xml/junit',
@@ -9,7 +10,7 @@ var options = {
   formData: {
     'project_name': 'Test',
     'file_path': {
-      'value': fs.createReadStream(__dirname + "/results.xml"),
+      'value': fs.createReadStream(process.cwd() + "/results.xml"),
       'options': {
         'filename': 'results.xml',
         'contentType': null
